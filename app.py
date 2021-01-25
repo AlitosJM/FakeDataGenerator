@@ -66,6 +66,8 @@ def main():
                         "he_IL", "hi_IN", "hr_HR", "hu_HU", "hy_AM", "id_ID", "it_CH", "it_IT", "ja_JP", "ka_GE", "ko_KR", "la", "lb_LU", "lt_LT", "lv_LV", "mt_MT", "ne_NP", "nl_BE", "nl_NL", "no_NO", "or_IN", "pl_PL", "pt_BR", "pt_PT", "ro_RO", "ru_RU", "sk_SK", "sl_SI", "sv_SE", "ta_IN", "th", "th_TH", "tl_PH", "tr_TR", "tw_GH", "uk_UA", "zh_CN", "zh_TW"]
 
     st.title("Fake Data Generator App")
+    stc.html(custom_title)
+
     menu = ["Home", "Customize", "About"]
     choice = st.sidebar.selectbox("Menu", menu)
 
@@ -76,10 +78,31 @@ def main():
         dataformat = st.sidebar.selectbox("Save As ", ["csv", "json"])
         df = generate_locale_profile(num_to_gen, locale)
         st.dataframe(df)
-        make_downloadable_df_format(df, dataformat)
+
+        with st.beta_expander("Download File"):
+            make_downloadable_df_format(df, dataformat)
 
     elif choice == menu[1]:
         st.subheader("Select Custm Fields")
+        num_to_gen = st.sidebar.number_input("Number", 10, 5000)
+        locale = st.sidebar.multiselect("Locate", locale_providers, default='en_US')
+        dataformat = st.sidebar.selectbox("Save As ", ["csv", "json"])
+
+        profile_options_list = ['username', 'name', 'sex', 'address', 'mail', 'birthdate',
+                                'job', 'company', 'ssn', 'residence', 'current_location', 'blood_group', 'website']
+        profile_fields = st.sidebar.multiselect("Fields", profile_options_list, default="username")
+        custom_fake = Faker(locale)
+        data = [custom_fake.profile(fields=profile_fields) for i in range(num_to_gen)]
+        df = pd.DataFrame(data)
+        st.dataframe(df)
+
+        with st.beta_expander("View As JSON"):
+            for i in range(num_to_gen):
+                st.write(custom_fake.profile(fields=profile_fields))
+
+        with st.beta_expander("Download File"):
+            make_downloadable_df_format(df, dataformat)
+
     else:
         st.subheader("About")
 
